@@ -1,0 +1,29 @@
+name: Process Landing
+on:
+  push:
+    paths:
+      - 'landing.zip'
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract archive
+        run: |
+          unzip landing.zip
+          rm landing.zip
+      - name: Add kclient.php
+        run: |
+          echo '<?php echo "KClient loaded"; ?>' > kclient.php
+      - name: Modify index.php
+        run: |
+          if [ -f index.php ]; then
+            sed -i '1i<?php echo "Modified"; ?>' index.php
+          fi
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Processed landing files" || exit 0
+          git push
